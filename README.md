@@ -1,0 +1,2 @@
+# tstrp
+json dict
