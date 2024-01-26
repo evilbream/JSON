@@ -10,20 +10,25 @@ def warning(warn):
 def error(err):
     print (err)
 
+def assert_true(test_dict, schema):
+    print ('\n***')
+    js = JSON (test_dict)
+    correct = js.validate (schema, warning_callback=warning, error_callback=error)
+    assert correct
+    print(f'{"_"*20} if there are no warnings under the line, then the dictionary has been successfully corrected {"_"*20}')
+    assert js.validate(schema, warning_callback=warning, error_callback=error) # assert dict is corrected according to the scheme and types required
+
+def assert_false(test_dict, schema):
+    print ('\n***')
+    js = JSON (test_dict)
+    incorrect = js.validate (schema, warning_callback=warning, error_callback=error)
+    assert incorrect is False
+
+
+
 def assert_valid():
     """ all testing dicts is placed in test_dicts file
         all testing schemas is placed in test_schemas"""
-    def assert_true(test_dict, schema):
-        print ('\n***')
-        js = JSON (test_dict)
-        correct = js.validate (schema, warning_callback=warning, error_callback=error)
-        assert correct
-
-    def assert_false(test_dict, schema):
-        print ('\n***')
-        js = JSON (test_dict)
-        incorrect = js.validate (schema, warning_callback=warning, error_callback=error)
-        assert incorrect is False
 
     assert_true(dict1_1, sch1)
     assert_true(dict1_2, sch1)
@@ -38,6 +43,7 @@ def assert_valid():
 
     assert_true(dict2_1, sch2)
     assert_true(dict2_2, sch2)
+    assert_true(dict2_2_1, sch2)
 
     assert_false(dict2_3, sch2)
 
@@ -45,9 +51,6 @@ def assert_valid():
     assert_true(dict3_2, sch3)
 
     assert_false(dict3_3, sch3)
-
-
-
 
 
 def assert_json_dict():
@@ -74,9 +77,40 @@ def assert_json_dict():
                     '34': {'14': {'56': {'666': 'fast light'}}}, '9': {'22': {'11': {'666': {'14': {'14': [12, 23, 44]}}}}},
                     'mkdir': {'9': {'22': {'11': {'ls': {'14': {'14': [12, 23, 44]}}}}}}}
 
+
+
+def assert_gpt_test():
+    for i in dict_sh1_correct: # 30 test dicts tested on sch1
+        assert_true(i, sch1)
+
+    for i in dict_sh1_incorrect:
+        assert_false(i, sch1)
+
+    for i in dict_sh2_incorrect:
+        assert_false (i, sch2)
+
+    for i in dict_sh2_correct:
+        assert_true(i, sch2)
+
+    for i in dict_sh4_correct:
+        assert_true(i, sch4)
+
+    for i in dict_sh4_incorrect:
+        assert_false(i, sch4)
+
+    for i in dict_sh5_incorrect:
+        assert_false(i, sch5)
+
+    for i in dict_sh5_correct:
+        assert_true(i, sch5)
+
+
 if __name__ == '__main__':
-    assert_json_dict()
     assert_valid()
+    assert_gpt_test()
+
+
+
 
 
 

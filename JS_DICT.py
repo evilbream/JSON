@@ -70,20 +70,25 @@ class JSON(dict):
             if data in enum:
                 return data, None
             else:
-                return False, f'Value must be from {enum}'
-        if isinstance(data, type_): # if type of data matches the required type
+                return 'False_False', f'Value must be from {enum}'
+        if (type_ == type(data)) or ((type_ == float) and (type(data) == int)): # if type of data matches the required type
+            # correct viewing of the type
             return data, None
+        elif type(data) in [dict, list, bool, type(None)]: # now bool and None type isn't converted to the str format
+            return 'False_False', f'Unsupported format {type(data)} it must be {type_}'
+        elif type_ == bool:
+                if data in [1, 0]:
+                    return bool(data), f'Value must be {type_}, not {type(data)}'
+                else:
+                    return 'False_False', f'Unsupported format {type(data)} it must be {type_}'
         else:
-            if (data in [1, 0]) and (isinstance(type_, bool)):
-                return bool(data), f'Value must be {type_}, not {type(data)}'
-            else:
-                try:
-                    val = type_(data)
-                    return val, f'Value must be {type_}, not {type(data)}'
-                except ValueError:
-                    return False, f'Unsupported format {type(data)} it must be {type_}'
-                except TypeError:
-                    return False, f'Unsupported format {type(data)} it must be {type_}'
+            try:
+                val = type_(data)
+                return val, f'Value must be {type_}, not {type(data)}'
+            except ValueError:
+                return 'False_False', f'Unsupported format {type(data)} it must be {type_}'
+            except TypeError:
+                return 'False_False', f'Unsupported format {type(data)} it must be {type_}'
 
     def validate(self, schema:dict, data='init_None', error_callback: Callable = None, warning_callback: Callable=None):
         # VALID - schema status. If False - dict is invalid (one and more errors)
@@ -109,6 +114,11 @@ class JSON(dict):
                         else:
                             self.error(f'ERROR! key "{req}" is required.') if self.error else ''
                             self.VALID = False
+                    else:
+                        if ((isinstance(data[req], dict)) and (not data[req])) or (isinstance(data[req], list)) and (not data[req]): # if required field and dict or list is empty
+                            self.error(f'ERROR! key "{req}" could not be empty.') if self.error else ''
+                            self.VALID = False
+
                 val = schema.get('properties')
                 schema = val if val else schema
 
@@ -137,7 +147,7 @@ class JSON(dict):
                     if key in data: # testing format
                         enum = value.get('enum')
                         val, warning = self.validate_type(self.TYPE_DICT[end_type], data[key], enum)
-                        if val is not False:
+                        if val != 'False_False': # if value bool(false) its cant go through now using not false but 'False_False'
                             self.warnings(f'WARNING! key - "{key}". {warning}') if warning and self.warnings else ''
                             data[key] = val
                         else:
@@ -161,12 +171,13 @@ class JSON(dict):
                         self.warnings(f'WARNING! Missing key "{key}"') if self.warnings else ''
                     elif not isinstance(data[key], dict):
                         self.error(f'ERROR! key "{key}" must be the type of dict') # occurs if instead of the dict another type are given
+                        self.VALID = False
                     else:
                         self.validate(value, data[key])
 
                 case {'type': 'object'}:
                     if key in data:
-                        if not isinstance (data[key], dict):
+                        if not isinstance (data[key], dict): # do we need to say that empty dict is wrong. Probable yeah
                             self.error(f'ERROR! Unsupported type for the key "{key}" it must be dict') if self.error else ''
                             self.VALID = False
                     else:
