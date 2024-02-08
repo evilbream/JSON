@@ -31,9 +31,11 @@ class JSON(dict):
         'null': None
     }
     VALID = True
-    def __init__(self, some_dict: dict):
+
+    def __init__(self, some_dict: dict, no_replacement_for_the_first=False):
         super ().__init__ ()
-        self.update(some_dict)
+        self.no_replacement_for_the_first = no_replacement_for_the_first
+        self.update (some_dict)
 
     def __missing__(self, key):
         if isinstance(key, tuple):
@@ -188,23 +190,23 @@ class JSON(dict):
         return self.VALID
 
     def __setitem__(self, key, value):
-        if '.' in key:
-            item = tuple (reversed([i for i in key.split ('.')]))
-            new_dic = {}
-            new_dic[item[0]] = value
-            for i in item[1:-1]:
-                new_dic = self.new_dic(i, new_dic)
-            super (JSON, self).__setitem__ (item[-1], new_dic)
-        elif isinstance (key, list|tuple):
-            item = tuple (reversed([i for i in key]))
-            new_dic = {}
-            new_dic[item[0]] = value
-            for i in item[1:-1]:
-                new_dic = self.new_dic (i, new_dic)
-            super (JSON, self).__setitem__ (item[-1], new_dic)
+        if ('.' in key) or (isinstance (key, list | tuple)):
+            if '.' in key:
+                item = tuple (reversed ([i for i in key.split ('.')]))
+            else:
+                item = tuple (reversed ([i for i in key]))
+            new_dic = {item[0]: value}
 
+            if (item[-1] in self) and (len (item) > 2) and self.no_replacement_for_the_first:
+                for i in item[1:-2]:
+                    new_dic = self.new_dic (i, new_dic)
+                self[item[-1]][item[-2]] = new_dic
+            else:
+                for i in item[1:-1]:
+                    new_dic = self.new_dic (i, new_dic)
+                super (JSON, self).__setitem__ (item[-1], new_dic)
         else:
-            super(JSON, self).__setitem__(key, value)
+            super (JSON, self).__setitem__ (key, value)
 
     def __getitem__(self, item):
         if '.' in item:

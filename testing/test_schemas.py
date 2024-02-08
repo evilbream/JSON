@@ -371,3 +371,90 @@ sch5 = {
   },
   "required": ["user", "transaction"]
 }
+
+sch7 = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+        "complete": {
+            "default" : True,
+            "description" : "operation completion flag - if true - user balance should be reduced",
+            "type": "boolean"
+
+        },
+
+        "withdrawal": {
+            "type": "array",
+            "description" : "table of debits from user accounts",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "currency": {
+                        "type": "string",
+                        "default" : "   ",
+                        "enum": ["USD", "RUB"],
+                        "minLength": 3,
+                        "maxLength": 3
+                    },
+                    "amount": {
+                        "type": "number"
+                    }
+                },
+                "required": ["currency", "amount"]
+            }
+        },
+    "arr": {"type": "array",
+            "items": {
+                "type": "array",
+                "items": {
+                    "type": "integer"
+                },
+            }},
+    'withheld': {"type": "object",
+                "properties": {
+                    "cur": {
+                        "type": "string",
+                        "default" : "fgggg",
+                    },
+                    "am": {
+                        "type": "number",
+                        "default": 12.12
+                    }
+                },
+                "required": ["cur", "am"]
+                 },
+
+    "put": {
+        "type": "array",
+        "description": "table of debits from user accounts",
+        "items": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string",
+                    "default": "   ",
+                    "enum": ["USD", "RUB"],
+                    "minLength": 3,
+                    "maxLength": 3
+                },
+                "amount": {
+                    "type": "number"
+                },
+                "name": {'type': 'object',
+                         "properties": {
+                             "cut": {
+                                 "type": "number",
+                                 "default": "   ",
+                             }}
+                         }
+
+            },
+            "required": ["currency", "amount"]
+        }
+    },
+
+    'disabled': {'type': 'object'},
+        "required": [
+            "complete",
+            "valueSec", 'disabled'
+        ]
+}

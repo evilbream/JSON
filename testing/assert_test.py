@@ -14,6 +14,7 @@ def assert_true(test_dict, schema):
     print ('\n***')
     js = JSON (test_dict)
     correct = js.validate (schema, warning_callback=warning, error_callback=error)
+    print(js)
     assert correct
     print(f'{"_"*20} if there are no warnings under the line, then the dictionary has been successfully corrected {"_"*20}')
     assert js.validate(schema, warning_callback=warning, error_callback=error) # assert dict is corrected according to the scheme and types required
@@ -77,6 +78,27 @@ def assert_json_dict():
                     '34': {'14': {'56': {'666': 'fast light'}}}, '9': {'22': {'11': {'666': {'14': {'14': [12, 23, 44]}}}}},
                     'mkdir': {'9': {'22': {'11': {'ls': {'14': {'14': [12, 23, 44]}}}}}}}
 
+    tst_similar_val = JSON({}, no_replacement_for_the_first=True) # doesnt work yet with the dicts with dimensions less then 3!
+    tst_similar_val['lsrt.78.345'] = 44
+    tst_similar_val['lsrt.33.345'] = 23
+    tst_similar_val['lsrt', '12', '345'] = 44
+    tst_similar_val['lsrt.78.355'] = 44
+    tst_similar_val['lsrt.355.2222.222212.lll.221'] = 11
+
+    assert tst_similar_val == {'lsrt': {'78': {'355': 44}, '33': {'345': 23}, '12': {'345': 44}, '355': {'2222': {'222212': {'lll': {'221': 11}}}}}}
+
+    tst_not_sim = JSON ({})
+    tst_not_sim['lsrt.355.2222.222212.lll.221'] = 11
+    tst_not_sim['lsrt.78.345'] = 44
+    tst_not_sim['lsrt.33.345'] = 23
+    tst_not_sim['lsrt.12.345'] = 44
+    tst_not_sim['lsrt.78.355'] = 44
+
+    assert tst_not_sim == {'lsrt': {'78': {'355': 44}}}
+
+
+
+
 
 
 def assert_gpt_test():
@@ -107,6 +129,7 @@ def assert_gpt_test():
 
 if __name__ == '__main__':
     assert_valid()
+    assert_json_dict()
     assert_gpt_test()
 
 
