@@ -81,11 +81,11 @@ def assert_json_dict():
     tst_similar_val = JSON({}, no_replacement_for_the_first=True) # doesnt work yet with the dicts with dimensions less then 3!
     tst_similar_val['lsrt.78.345'] = 44
     tst_similar_val['lsrt.33.345'] = 23
+    tst_similar_val['lsrt.33.345'] = 109
     tst_similar_val['lsrt', '12', '345'] = 44
     tst_similar_val['lsrt.78.355'] = 44
     tst_similar_val['lsrt.355.2222.222212.lll.221'] = 11
-
-    assert tst_similar_val == {'lsrt': {'78': {'355': 44}, '33': {'345': 23}, '12': {'345': 44}, '355': {'2222': {'222212': {'lll': {'221': 11}}}}}}
+    assert tst_similar_val == {'lsrt': {'78': {'345': 44, '355': 44}, '33': {'345': 109}, '12': {'345': 44}, '355': {'2222': {'222212': {'lll': {'221': 11}}}}}}
 
     tst_not_sim = JSON ({})
     tst_not_sim['lsrt.355.2222.222212.lll.221'] = 11
@@ -93,8 +93,10 @@ def assert_json_dict():
     tst_not_sim['lsrt.33.345'] = 23
     tst_not_sim['lsrt.12.345'] = 44
     tst_not_sim['lsrt.78.355'] = 44
+    tst_not_sim['lsrt.78.356'] = 42
+    tst_not_sim['lsrt.78.212'] = 42
 
-    assert tst_not_sim == {'lsrt': {'78': {'355': 44}}}
+    assert tst_not_sim == {'lsrt': {'78': {'355': 44, '356': 42, '212': 42}}}
 
 
 

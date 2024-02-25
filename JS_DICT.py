@@ -193,8 +193,14 @@ class JSON(dict):
         if ('.' in key) or (isinstance (key, list | tuple)):
             if '.' in key:
                 item = tuple (reversed ([i for i in key.split ('.')]))
+                if self[[i for i in key.split ('.')][:-1]] is not None:
+                    self[[i for i in key.split ('.')][:-1]][[i for i in key.split ('.')][-1]] = value
+                    return
             else:
                 item = tuple (reversed ([i for i in key]))
+                if self[key[:-1]] is not None:
+                    self[key[:-1]][key[-1]] = value
+                    return
             new_dic = {item[0]: value}
 
             if (item[-1] in self) and (len (item) > 2) and self.no_replacement_for_the_first:
