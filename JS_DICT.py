@@ -4,19 +4,19 @@ from collections import abc
 from typing import Callable
 
 
-def one_dimension_dic(muldd, prt_key:str='', sep:str='.'):
+def one_dimension_dict(muldd, prt_key:str= '', sep:str= '.'):
     array = []
     for k, v in muldd.items():
         k = str(k)
         new_key = prt_key + sep + k if prt_key else k
         if isinstance(v, dict):
-            array.extend(one_dimension_dic(v, new_key, sep=sep).items())
+            array.extend(one_dimension_dict(v, new_key, sep=sep).items())
         else:
             array.append((new_key, v))
     return dict(array)
 
 def get_plain(muldd):
-    result = [{key: value} for key, value in one_dimension_dic(muldd).items()]
+    result = [{key: value} for key, value in one_dimension_dict(muldd).items()]
     return result
 
 
@@ -58,7 +58,7 @@ class JSON(dict):
         return mew_dic
 
     def plain(self):
-        res = [{key: value} for key, value in one_dimension_dic (self).items ()]
+        res = [{key: value} for key, value in one_dimension_dict (self).items ()]
         return res
 
     def init_validate_func(self, warning_callback, error_callback):
@@ -102,7 +102,7 @@ class JSON(dict):
         match schema:
             case {'type': 'object', 'required': required}:
 
-                # testing if all req in here cuz properties tested in the lover levels
+                # Test if all req in here cuz properties tested in the lover levels
                 if not isinstance(data, dict):
                     self.VALID = False
                     return f'must be the type of dict not {type(data)}'
@@ -146,7 +146,7 @@ class JSON(dict):
             match value:
                 case {'type': end_type} if end_type in ('integer', 'boolean', 'string', 'number'): # end of the array or dict no more recursion is needed
 
-                    if key in data: # testing format
+                    if key in data: # Test format
                         enum = value.get('enum')
                         val, warning = self.validate_type(self.TYPE_DICT[end_type], data[key], enum)
                         if val != 'False_False': # if value bool(false) its cant go through now using not false but 'False_False'
@@ -212,6 +212,7 @@ class JSON(dict):
                     new_dic = self.new_dic (i, new_dic)
                 super (JSON, self).__setitem__ (item[-1], new_dic)
         else:
+
             super (JSON, self).__setitem__ (key, value)
 
     def __getitem__(self, item):
@@ -221,7 +222,12 @@ class JSON(dict):
             item = tuple(i for i in item)
         return super(JSON, self).__getitem__(item)
 
+    def get(self, key, default=None):
+        if self[key] == None:  # when using is returned default when value fe is {}
+            return default
+        else:
+            return self[key]
 
-
-
+    def __contains__(self, key):
+        return key in self.keys () or self.get (key) != None
 
