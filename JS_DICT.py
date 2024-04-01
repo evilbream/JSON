@@ -1,6 +1,4 @@
-import json
 from collections import abc
-
 from typing import Callable
 
 
@@ -14,6 +12,7 @@ def one_dimension_dict(muldd, prt_key:str= '', sep:str= '.'):
         else:
             array.append((new_key, v))
     return dict(array)
+
 
 def get_plain(muldd):
     result = [{key: value} for key, value in one_dimension_dict(muldd).items()]
@@ -51,11 +50,11 @@ class JSON(dict):
                     return None
             return res
         return None
-
-    def new_dic(self, key, val):
-        mew_dic = {}
-        mew_dic[key] = val
-        return mew_dic
+    @staticmethod
+    def new_dict(key, val):
+        mew_dict = {}
+        mew_dict[key] = val
+        return mew_dict
 
     def plain(self):
         res = [{key: value} for key, value in one_dimension_dict (self).items ()]
@@ -205,11 +204,11 @@ class JSON(dict):
 
             if (item[-1] in self) and (len (item) > 2) and self.no_replacement_for_the_first:
                 for i in item[1:-2]:
-                    new_dic = self.new_dic (i, new_dic)
+                    new_dic = self.new_dict (i, new_dic)
                 self[item[-1]][item[-2]] = new_dic
             else:
                 for i in item[1:-1]:
-                    new_dic = self.new_dic (i, new_dic)
+                    new_dic = self.new_dict (i, new_dic)
                 super (JSON, self).__setitem__ (item[-1], new_dic)
         else:
 
@@ -223,11 +222,14 @@ class JSON(dict):
         return super(JSON, self).__getitem__(item)
 
     def get(self, key, default=None):
-        if self[key] == None:  # when using is returned default when value fe is {}
+        if self[key] == None:
             return default
         else:
             return self[key]
 
     def __contains__(self, key):
-        return key in self.keys () or self.get (key) != None
+        if isinstance(key, str|int|float):
+            return key in self.keys () or self.get (key) != None
+        else:
+            return self.get (key) != None
 

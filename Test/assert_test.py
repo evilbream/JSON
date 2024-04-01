@@ -28,8 +28,8 @@ def assert_false(test_dict, schema):
 
 
 def assert_valid():
-    """ all testing dicts is placed in test_dicts file
-        all testing schemas is placed in test_schemas"""
+    """ all Test dicts is placed in test_dicts file
+        all Test schemas is placed in test_schemas"""
 
     assert_true(dict1_1, sch1)
     assert_true(dict1_2, sch1)
@@ -59,7 +59,6 @@ def assert_json_dict():
 
     test['lsrt.78.345'] = 44
     test[['34', '14', '56', '666']] = 'fast light'
-    # set or get value using testing['a.b'] or testing['a','b'] or testing[['a','b']] or testing[('a','b')]. if no value is given None is returned
     test[('9', '22', '11', '666', '14', '14')] = [12, 23, 44]
     test[('mkdir', '9', '22', '11', 'ls', '14', '14')] = [12, 23, 44]
 
@@ -86,6 +85,17 @@ def assert_json_dict():
     tst_similar_val['lsrt.78.355'] = 44
     tst_similar_val['lsrt.355.2222.222212.lll.221'] = 11
     assert tst_similar_val == {'lsrt': {'78': {'345': 44, '355': 44}, '33': {'345': 109}, '12': {'345': 44}, '355': {'2222': {'222212': {'lll': {'221': 11}}}}}}
+    assert tst_similar_val.get('lsrt.355.2222.222212.lll.221') == 11
+    assert tst_similar_val.get ('lsrt.355.2222.222212.lll.222') is None
+    assert tst_similar_val.get ('lsrt.355.2222.222212.lll.222', {}) == {}
+    assert 'lsrt.355.2222.222212.lll.221' in tst_similar_val
+    assert 'lsrt.355.2222.222212' in tst_similar_val
+    assert 'lsrt.355.2222' in tst_similar_val
+    assert ('lsrt.355.2222.222212.lll.222'  in tst_similar_val) is False
+    assert ('1.355.2222.222212.lll.222' in tst_similar_val) is False
+    assert ('lsrt.355.222212.lll.222' in tst_similar_val) is False
+    assert 'lsrt.78' in tst_similar_val
+    assert 'lsrt' in tst_similar_val
 
     tst_not_sim = JSON ({})
     tst_not_sim['lsrt.355.2222.222212.lll.221'] = 11
@@ -97,7 +107,21 @@ def assert_json_dict():
     tst_not_sim['lsrt.78.212'] = 42
 
     assert tst_not_sim == {'lsrt': {'78': {'355': 44, '356': 42, '212': 42}}}
-
+    assert tst_not_sim.get('lsrt.78.212') == 42
+    assert 'lsrt' in tst_not_sim
+    assert 'lsrt.78' in tst_not_sim
+    assert 'lsrt.78.212' in tst_not_sim
+    assert ('lsrt.78.212.23' in tst_not_sim) is False
+    assert ('lsrt.33.212.23' in tst_not_sim) is False
+    assert ('lsrt.77.212' in tst_not_sim) is False
+    assert ('1.78.212' in tst_not_sim) is False
+    assert ('lsrt.78.2123' in tst_not_sim) is False
+    assert ('lsrt.34.212.23' in tst_not_sim) is False
+    assert ('lsrt.77.212' in tst_not_sim) is False
+    assert tst_not_sim.get ('lsrt.78') == {'355': 44, '356': 42, '212': 42}
+    assert tst_not_sim.get ('lsrt.77') is None
+    assert tst_not_sim.get ('lsrt.78.212.23') is None
+    assert tst_similar_val.plain() == [{'lsrt.78.345': 44}, {'lsrt.78.355': 44}, {'lsrt.33.345': 109}, {'lsrt.12.345': 44}, {'lsrt.355.2222.222212.lll.221': 11}]
 
 
 
