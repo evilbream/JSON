@@ -1,7 +1,7 @@
 from collections import abc
 from typing import Callable
-
-
+from google.cloud.firestore_v1.transforms import ArrayUnion, ArrayRemove
+from firebase_admin import firestore
 def one_dimension_dict(muldd, prt_key:str= '', sep:str= '.'):
     array = []
     for k, v in muldd.items():
@@ -31,8 +31,9 @@ class JSON(dict):
     }
     VALID = True
 
-    def __init__(self, some_dict: dict, no_replacement_for_the_first=False):
+    def __init__(self, some_dict: dict, no_replacement_for_the_first=False, oldValue=None):
         super ().__init__ ()
+        self.oldValue = oldValue
         self.no_replacement_for_the_first = no_replacement_for_the_first
         self.update (some_dict)
 
@@ -232,4 +233,54 @@ class JSON(dict):
             return key in self.keys () or self.get (key) != None
         else:
             return self.get (key) != None
+    def _get_str_path(self, arg_value):
+        if not isinstance(arg_value, dict) or not arg_value:
+            yield '', arg_value
+        else:
+            for key, value in arg_value.items():
+                if isinstance(key, tuple):
+                    key = '.'.join(f'{k}' for k in key)
+                for subkey, subvalue in self._get_str_path(value):
+                    yield f'{key}.{subkey}' if subkey != '' else key, subvalue
+
+    @property
+    def _fb_update_mask(self) -> dict:
+        if self.oldValue == None:
+
+            return self
+        result = {}
+        current = dict(self._get_str_path(self))
+        original = dict(self._get_str_path(dict(self.oldValue)))
+        current_keys = set(current)
+        original_keys = set(original)
+
+        updated = []
+        for key in current_keys & original_keys:
+            if current[key] != original[key]:
+                if isinstance(current[key], (tuple, list)) and isinstance(original[key], (tuple, list)):
+                    current_members = set(current[key])
+                    original_members = set(original[key])
+                    add = current_members - original_members
+                    deleted = original_members - current_members
+                    if add and not deleted:
+                        result[key] = ArrayUnion(sorted(add))
+                    elif deleted and not add:
+                        result[key] = ArrayRemove(sorted(deleted))
+                    else:
+                        result[key] = current[key]
+                else:
+                    result[key] = current[key]
+                updated.append(key)
+
+        for key in (current_keys - original_keys):
+            result[key] = current[key]
+
+        for key in (original_keys - current_keys):
+            if not any(other.startswith(key) for other in current_keys if other != key):
+                if not any(key.startswith(updated_key) for updated_key in updated):
+                    result[key] = firestore.DELETE_FIELD
+
+        return result
+
+
 
